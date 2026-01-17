@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Family Tree Adventure</title>
+  <title>Family Vocabulary</title>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -11,635 +11,977 @@
       box-sizing: border-box;
     }
     
-    @import url('https://fonts.googleapis.com/css2?family=Chewy&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
     
     * {
       box-sizing: border-box;
     }
     
     body {
-      font-family: 'Chewy', cursive;
+      font-family: 'Fredoka', sans-serif;
       margin: 0;
       padding: 0;
     }
     
-    .tree-branch {
-      position: relative;
-      animation: growBranch 0.8s ease-out;
-    }
-    
-    @keyframes growBranch {
-      from {
-        transform: scaleY(0);
-        opacity: 0;
-      }
-      to {
-        transform: scaleY(1);
-        opacity: 1;
-      }
-    }
-    
-    .family-bubble {
-      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    .family-card {
+      transition: all 0.4s ease;
       cursor: pointer;
       position: relative;
+      overflow: hidden;
     }
     
-    .family-bubble:hover {
-      transform: scale(1.15) rotate(5deg);
+    .family-card:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 15px 35px rgba(37, 99, 235, 0.3);
+    }
+    
+    .family-card.active {
+      transform: scale(1.1) rotate(2deg);
+      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.4);
       z-index: 10;
     }
     
-    .family-bubble.revealed {
-      animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-    
-    @keyframes popIn {
-      0% {
-        transform: scale(0) rotate(0deg);
-        opacity: 0;
-      }
-      50% {
-        transform: scale(1.2) rotate(10deg);
-      }
-      100% {
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-      }
-    }
-    
-    .connection-line {
+    .pulse-ring {
       position: absolute;
-      background: linear-gradient(90deg, transparent, #8b4513, transparent);
-      height: 3px;
-      transform-origin: left;
-      animation: drawLine 0.8s ease-out;
-    }
-    
-    @keyframes drawLine {
-      from {
-        width: 0;
-      }
-      to {
-        width: 100%;
-      }
-    }
-    
-    .mystery-card {
-      transition: all 0.5s ease;
-      cursor: pointer;
-      perspective: 1000px;
-    }
-    
-    .mystery-card:hover {
-      transform: translateY(-10px);
-    }
-    
-    .mystery-card.flipped .card-inner {
-      transform: rotateY(180deg);
-    }
-    
-    .card-inner {
-      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 100%;
       height: 100%;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
+      border-radius: 50%;
+      border: 3px solid rgba(37, 99, 235, 0.6);
+      animation: pulse 1.5s ease-out infinite;
+      opacity: 0;
     }
     
-    .card-front, .card-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .card-back {
-      transform: rotateY(180deg);
-    }
-    
-    .relationship-connector {
-      animation: pulse 2s infinite;
+    .family-card.active .pulse-ring {
+      opacity: 1;
     }
     
     @keyframes pulse {
-      0%, 100% {
-        opacity: 0.6;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.05);
-      }
-    }
-    
-    .celebration-confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      animation: confettiFall 3s ease-out forwards;
-      pointer-events: none;
-    }
-    
-    @keyframes confettiFall {
       0% {
-        transform: translateY(-100px) rotate(0deg);
+        transform: translate(-50%, -50%) scale(0.8);
         opacity: 1;
       }
       100% {
-        transform: translateY(100vh) rotate(720deg);
+        transform: translate(-50%, -50%) scale(1.5);
         opacity: 0;
       }
     }
     
-    .building-game-piece {
+    .memory-card {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    
+    .memory-card.flipped {
+      transform: rotateY(180deg);
+    }
+    
+    .memory-card-front,
+    .memory-card-back {
+      backface-visibility: hidden;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+    }
+    
+    .memory-card-back {
+      transform: rotateY(180deg);
+    }
+    
+    .bounce {
+      animation: bounce 0.6s ease;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.15) rotate(-5deg); }
+      50% { transform: scale(1.1) rotate(5deg); }
+      75% { transform: scale(1.15) rotate(-3deg); }
+    }
+    
+    .quiz-option {
       transition: all 0.3s ease;
-      cursor: grab;
     }
     
-    .building-game-piece:active {
-      cursor: grabbing;
+    .quiz-option:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .quiz-option.correct {
+      background: #4ade80 !important;
+      color: white;
+      animation: correctPulse 0.5s ease;
+    }
+    
+    .quiz-option.incorrect {
+      background: #f87171 !important;
+      color: white;
+      animation: shake 0.5s ease;
+    }
+    
+    @keyframes correctPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .speak-btn {
+      transition: all 0.3s ease;
+    }
+    
+    .speak-btn:hover {
       transform: scale(1.1);
+      filter: brightness(1.2);
     }
     
-    .build-slot {
+    .speak-btn:active {
+      transform: scale(0.95);
+    }
+
+    .drag-item {
+      cursor: move;
+      transition: all 0.3s ease;
+    }
+
+    .drag-item:hover {
+      transform: scale(1.05);
+    }
+
+    .drag-item.dragging {
+      opacity: 0.5;
+      transform: scale(0.9);
+    }
+
+    .drop-zone {
       transition: all 0.3s ease;
       min-height: 100px;
     }
-    
-    .build-slot.highlight {
-      background: rgba(255, 215, 0, 0.3) !important;
-      border: 3px solid gold !important;
+
+    .drop-zone.drag-over {
+      background: rgba(37, 99, 235, 0.2) !important;
+      border: 3px dashed #2563eb !important;
       transform: scale(1.05);
     }
-    
-    .build-slot.filled {
-      border-color: #22c55e !important;
+
+    .drop-zone.matched {
+      background: rgba(34, 197, 94, 0.3) !important;
+      border: 3px solid #22c55e !important;
     }
-    
-    .wiggle {
-      animation: wiggle 0.5s ease;
+
+    .pair-card {
+      transition: all 0.4s ease;
+      cursor: pointer;
     }
-    
-    @keyframes wiggle {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-10deg); }
-      75% { transform: rotate(10deg); }
+
+    .pair-card:hover:not(.matched):not(.selected) {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .pair-card.selected {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 4px #2563eb;
+    }
+
+    .pair-card.matched {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .count-option {
+      transition: all 0.3s ease;
+    }
+
+    .count-option:hover {
+      transform: scale(1.1);
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
-  <div id="app" class="w-full h-full overflow-auto"><!-- Welcome Screen -->
-   <div id="welcome-screen" class="w-full min-h-screen flex flex-col items-center justify-center px-6 py-12">
-    <div class="text-center max-w-4xl">
-     <div class="text-9xl mb-8 animate-bounce">
-      🏡
-     </div>
-     <h1 id="main-title" class="text-7xl font-bold mb-6">Family Tree Adventure</h1>
-     <p id="welcome-message" class="text-3xl mb-12">Build your family tree and learn relationships!</p><button id="start-game-btn" class="px-16 py-8 text-4xl rounded-full font-bold shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110"> 🌳 Start Adventure </button>
+  <div id="app" class="w-full h-full overflow-auto"><!-- Hero Section -->
+   <div id="hero-section" class="w-full text-center py-12 px-6">
+    <h1 id="main-title" class="text-6xl font-bold mb-4">My Family 👨‍👩‍👧���👦</h1>
+    <p id="subtitle" class="text-3xl">Learn family vocabulary</p>
+   </div><!-- Vocabulary Cards Section -->
+   <div class="w-full px-6 py-8">
+    <h2 id="vocab-title" class="text-4xl font-bold text-center mb-4">Meet the Family</h2>
+    <p class="text-center text-xl mb-8" id="instruction-text">👆 Click on any family member!</p>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-7xl mx-auto"><!-- Family Member Cards -->
     </div>
-   </div><!-- Main Game Area -->
-   <div id="game-area" class="w-full px-6 py-12" style="display: none;"><!-- Game 1: Build Your Tree -->
-    <section class="max-w-6xl mx-auto mb-20">
-     <h2 class="text-5xl font-bold text-center mb-4">🌳 Build Your Family Tree</h2>
-     <p class="text-2xl text-center mb-8">Drag family members to their correct place!</p>
-     <div class="relative"><!-- Tree Structure -->
-      <div class="flex flex-col items-center gap-8"><!-- Grandparents Level -->
-       <div class="flex justify-center gap-16 mb-4">
-        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="grandpa"><span class="text-sm font-bold mb-2">Grandpa</span> <span class="text-5xl opacity-30">👴</span>
-        </div>
-        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="grandma"><span class="text-sm font-bold mb-2">Grandma</span> <span class="text-5xl opacity-30">👵</span>
-        </div>
-       </div><!-- Parents Level -->
-       <div class="flex justify-center gap-16 mb-4">
-        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="dad"><span class="text-sm font-bold mb-2">Dad</span> <span class="text-5xl opacity-30">👨</span>
-        </div>
-        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="mom"><span class="text-sm font-bold mb-2">Mom</span> <span class="text-5xl opacity-30">👩</span>
-        </div>
-       </div><!-- Children Level -->
-       <div class="flex justify-center gap-8">
-        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-32 h-32 flex flex-col items-center justify-center" data-role="brother"><span class="text-xs font-bold mb-1">Brother</span> <span class="text-4xl opacity-30">🧒</span>
-        </div>
-        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-32 h-32 flex flex-col items-center justify-center" data-role="sister"><span class="text-xs font-bold mb-1">Sister</span> <span class="text-4xl opacity-30">👧</span>
-        </div>
-        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-32 h-32 flex flex-col items-center justify-center" data-role="baby"><span class="text-xs font-bold mb-1">Baby</span> <span class="text-4xl opacity-30">👶</span>
-        </div>
-       </div>
-      </div><!-- Draggable Pieces -->
-      <div class="mt-12 p-8 rounded-3xl">
-       <p class="text-2xl font-bold text-center mb-6">👇 Drag these family members:</p>
-       <div id="building-pieces" class="flex flex-wrap justify-center gap-6"><!-- Pieces will be inserted here -->
-       </div>
+   </div><!-- Memory Game Section -->
+   <div class="w-full px-6 py-12">
+    <h2 id="memory-title" class="text-4xl font-bold text-center mb-8">🎮 Memory Game</h2>
+    <div class="text-center mb-6"><button id="start-memory-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg hover:shadow-xl transition-all"> Start Game </button>
+     <p id="memory-score" class="text-2xl mt-4 font-bold">Pairs found: 0/5</p>
+    </div>
+    <div id="memory-grid" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto"><!-- Memory cards will be inserted here -->
+    </div>
+   </div><!-- Quiz Game Section -->
+   <div class="w-full px-6 py-12">
+    <h2 id="quiz-title" class="text-4xl font-bold text-center mb-8">❓ Who is it?</h2>
+    <div class="max-w-2xl mx-auto">
+     <div id="quiz-container" class="text-center">
+      <div id="quiz-emoji" class="text-9xl mb-8">
+       👨
       </div>
-      <div class="text-center mt-8">
-       <p id="build-score" class="text-3xl font-bold">Placed: 0/7</p>
+      <p id="quiz-question" class="text-3xl mb-8 font-bold">Who is this family member?</p>
+      <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4"><!-- Quiz options will be inserted here -->
       </div>
+      <p id="quiz-feedback" class="text-2xl mt-6 font-bold min-h-12"></p><button id="next-quiz-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg hover:shadow-xl transition-all mt-4" style="display: none;"> Next Question </button>
      </div>
-    </section><!-- Game 2: Mystery Family Member -->
-    <section class="max-w-6xl mx-auto mb-20">
-     <h2 class="text-5xl font-bold text-center mb-4">🎭 Who Am I?</h2>
-     <p class="text-2xl text-center mb-8">Read the clues and guess the family member!</p>
-     <div class="max-w-2xl mx-auto">
-      <div class="mystery-card rounded-3xl shadow-2xl p-8 h-96">
-       <div class="card-inner">
-        <div class="card-front flex flex-col items-center justify-center">
-         <div class="text-8xl mb-6">
-          ❓
-         </div><button id="reveal-clue-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg"> Show Clue </button>
-        </div>
-        <div class="card-back">
-         <div id="clue-content" class="text-center"><!-- Clue content will be inserted here -->
-         </div>
-        </div>
-       </div>
-      </div>
-      <div id="mystery-options" class="grid grid-cols-2 gap-4 mt-8"><!-- Options will be inserted here -->
-      </div>
-      <div class="text-center mt-6">
-       <p id="mystery-feedback" class="text-3xl font-bold min-h-12"></p><button id="next-mystery-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg mt-4" style="display: none;"> Next Mystery </button>
-      </div>
+    </div>
+   </div><!-- Drag and Drop Game Section -->
+   <div class="w-full px-6 py-12">
+    <h2 class="text-4xl font-bold text-center mb-4" id="drag-title">🎯 Match the Family!</h2>
+    <p class="text-center text-xl mb-8" id="drag-instruction">Drag each emoji to its name!</p>
+    <div class="max-w-4xl mx-auto">
+     <div id="drag-game" class="grid grid-cols-2 md:grid-cols-3 gap-6"><!-- Drag and drop items will be inserted here -->
      </div>
-    </section><!-- Game 3: Relationship Quiz -->
-    <section class="max-w-6xl mx-auto mb-20">
-     <h2 class="text-5xl font-bold text-center mb-4">💕 Family Relationships</h2>
-     <p class="text-2xl text-center mb-8">Connect the relationships correctly!</p>
-     <div class="max-w-4xl mx-auto">
-      <div id="relationship-quiz" class="space-y-6"><!-- Quiz items will be inserted here -->
-      </div>
-      <div class="text-center mt-8"><button id="check-relationships-btn" class="px-10 py-5 text-3xl rounded-full font-bold shadow-xl"> Check Answers </button>
-       <p id="relationship-score" class="text-3xl font-bold mt-6 min-h-12"></p>
-      </div>
+     <div class="text-center mt-6"><button id="reset-drag-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg hover:shadow-xl transition-all"> Reset Game </button>
+      <p id="drag-score" class="text-2xl mt-4 font-bold">Matches: 0/10</p>
      </div>
-    </section><!-- Completion Screen -->
-    <div id="completion-screen" class="text-center py-20" style="display: none;">
-     <div class="text-9xl mb-6 animate-bounce">
-      🎉
+    </div>
+   </div><!-- Find the Pair Game Section -->
+   <div class="w-full px-6 py-12">
+    <h2 class="text-4xl font-bold text-center mb-4" id="pair-title">👀 Find the Pair!</h2>
+    <p class="text-center text-xl mb-8" id="pair-instruction">Click on two matching family members!</p>
+    <div class="max-w-5xl mx-auto">
+     <div class="text-center mb-6"><button id="start-pair-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg hover:shadow-xl transition-all"> Start Game </button>
+      <p id="pair-score" class="text-2xl mt-4 font-bold">Pairs found: 0/5</p>
      </div>
-     <h2 id="complete-message" class="text-6xl font-bold mb-8">You're a Family Expert!</h2>
-     <p class="text-3xl mb-8">You've mastered all the family relationships!</p><button id="play-again-btn" class="px-12 py-6 text-3xl rounded-full font-bold shadow-2xl"> 🔄 Play Again </button>
+     <div id="pair-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4"><!-- Pair game cards will be inserted here -->
+     </div>
+    </div>
+   </div><!-- Counting Game Section -->
+   <div class="w-full px-6 py-12">
+    <h2 class="text-4xl font-bold text-center mb-4" id="count-title">🔢 Count the Family!</h2>
+    <p class="text-center text-xl mb-8" id="count-instruction">How many family members do you see?</p>
+    <div class="max-w-2xl mx-auto">
+     <div id="count-container" class="text-center">
+      <div id="count-emojis" class="text-6xl mb-8 flex flex-wrap justify-center gap-4"><!-- Emojis will be inserted here -->
+      </div>
+      <p id="count-question" class="text-3xl mb-8 font-bold">How many do you see?</p>
+      <div id="count-options" class="grid grid-cols-3 gap-4 max-w-md mx-auto"><!-- Count options will be inserted here -->
+      </div>
+      <p id="count-feedback" class="text-2xl mt-6 font-bold min-h-12"></p><button id="next-count-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg hover:shadow-xl transition-all mt-4" style="display: none;"> Next Question </button>
+     </div>
+    </div>
+   </div><!-- Listen and Find Game Section -->
+   <div class="w-full px-6 py-12 pb-20">
+    <h2 class="text-4xl font-bold text-center mb-4" id="listen-title">👂 Listen and Find!</h2>
+    <p class="text-center text-xl mb-8" id="listen-instruction">Click on the speaker to hear the name, then find the family member!</p>
+    <div class="max-w-4xl mx-auto">
+     <div class="text-center mb-8"><button id="play-sound-btn" class="px-12 py-6 text-3xl rounded-full font-bold shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-r from-purple-500 to-pink-500 text-white"> 🔊 Play Sound </button>
+      <p id="listen-feedback" class="text-2xl mt-6 font-bold min-h-12"></p>
+     </div>
+     <div id="listen-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4"><!-- Listen game cards will be inserted here -->
+     </div>
+     <div class="text-center mt-6"><button id="next-listen-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg hover:shadow-xl transition-all" style="display: none;"> Next Round </button>
+      <p id="listen-score" class="text-2xl mt-4 font-bold">Score: 0/0</p>
+     </div>
     </div>
    </div>
   </div>
   <script>
     const defaultConfig = {
-      background_color: '#fef3c7',
-      primary_color: '#f59e0b',
+      background_color: '#dbeafe',
+      primary_color: '#2563eb',
       secondary_color: '#ffffff',
-      text_color: '#78350f',
-      accent_color: '#ec4899',
-      font_family: 'Chewy',
+      text_color: '#1e3a8a',
+      accent_color: '#0ea5e9',
+      font_family: 'Fredoka',
       font_size: 16,
-      main_title: 'Family Tree Adventure',
-      welcome_message: 'Build your family tree and learn relationships!',
-      start_button_text: '🌳 Start Adventure',
-      complete_message: "You're a Family Expert!"
+      main_title: 'My Family 👨‍👩‍👧‍👦',
+      subtitle: 'Learn family vocabulary',
+      memory_game_title: '🎮 Memory Game',
+      quiz_game_title: '❓ Who is it?'
     };
     
     const familyMembers = [
-      { role: 'grandpa', emoji: '👴', name: 'Grandpa' },
-      { role: 'grandma', emoji: '👵', name: 'Grandma' },
-      { role: 'dad', emoji: '👨', name: 'Dad' },
-      { role: 'mom', emoji: '👩', name: 'Mom' },
-      { role: 'brother', emoji: '🧒', name: 'Brother' },
-      { role: 'sister', emoji: '👧', name: 'Sister' },
-      { role: 'baby', emoji: '👶', name: 'Baby' }
+      { name: 'Dad', emoji: '👨', color: '#3b82f6' },
+      { name: 'Mom', emoji: '👩', color: '#ec4899' },
+      { name: 'Grandpa', emoji: '👴', color: '#6366f1' },
+      { name: 'Grandma', emoji: '👵', color: '#a855f7' },
+      { name: 'Brother', emoji: '🧒', color: '#06b6d4' },
+      { name: 'Sister', emoji: '👧', color: '#ef4444' },
+      { name: 'Baby', emoji: '👶', color: '#14b8a6' },
+      { name: 'Uncle', emoji: '👨🏻', color: '#8b5cf6' },
+      { name: 'Aunt', emoji: '👩🏻', color: '#f97316' },
+      { name: 'Cousin', emoji: '🧑', color: '#22c55e' }
     ];
     
-    const mysteryClues = [
-      { role: 'dad', clue: "I'm your parent who is a man. I might take you to play sports!", emoji: '👨' },
-      { role: 'mom', clue: "I'm your parent who is a woman. I love taking care of you!", emoji: '👩' },
-      { role: 'grandpa', clue: "I'm your dad's dad or your mom's dad. I tell great stories!", emoji: '👴' },
-      { role: 'grandma', clue: "I'm your dad's mom or your mom's mom. I bake cookies!", emoji: '👵' },
-      { role: 'sister', clue: "I'm your sibling who is a girl. We share the same parents!", emoji: '👧' },
-      { role: 'brother', clue: "I'm your sibling who is a boy. We play together!", emoji: '🧒' },
-      { role: 'baby', clue: "I'm the youngest in the family. Goo goo ga ga!", emoji: '👶' }
-    ];
+    let memoryCards = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let currentQuizIndex = 0;
+    let quizMembers = [];
+    let activeCard = null;
+    let dragMatches = 0;
+    let pairGameCards = [];
+    let selectedPairCards = [];
+    let pairMatches = 0;
+    let currentCountAnswer = 0;
+    let currentListenMember = null;
+    let listenAttempts = 0;
+    let listenCorrect = 0;
     
-    const relationships = [
-      { person1: '👨', relationship: 'is the husband of', person2: '👩', answer: 'mom' },
-      { person1: '👴', relationship: 'is the father of', person2: '👨', answer: 'dad' },
-      { person1: '👧', relationship: 'is the sister of', person2: '🧒', answer: 'brother' },
-      { person1: '👵', relationship: 'is the grandma of', person2: '👶', answer: 'baby' }
-    ];
-    
-    let buildScore = 0;
-    let currentMysteryIndex = 0;
-    let draggedElement = null;
-    
-    function startGame() {
-      document.getElementById('welcome-screen').style.display = 'none';
-      document.getElementById('game-area').style.display = 'block';
-      initBuildingGame();
-      initMysteryGame();
-      initRelationshipQuiz();
-    }
-    
-    function initBuildingGame() {
-      const piecesContainer = document.getElementById('building-pieces');
-      piecesContainer.innerHTML = '';
+    function createVocabularyCards() {
+      const grid = document.querySelector('.grid');
+      grid.innerHTML = '';
       
-      const shuffled = [...familyMembers].sort(() => Math.random() - 0.5);
-      
-      shuffled.forEach(member => {
-        const piece = document.createElement('div');
-        piece.className = 'building-game-piece rounded-2xl p-6 shadow-xl text-center';
-        piece.draggable = true;
-        piece.dataset.role = member.role;
-        piece.innerHTML = `
-          <div class="text-6xl mb-2">${member.emoji}</div>
-          <p class="text-lg font-bold">${member.name}</p>
+      familyMembers.forEach((member, index) => {
+        const card = document.createElement('div');
+        card.className = 'family-card rounded-2xl p-6 text-center shadow-lg relative';
+        card.style.background = defaultConfig.secondary_color;
+        card.dataset.index = index;
+        
+        card.innerHTML = `
+          <div class="pulse-ring"></div>
+          <div class="text-7xl mb-4 relative z-10">${member.emoji}</div>
+          <p class="text-2xl font-bold mb-3 relative z-10" style="color: ${defaultConfig.text_color}">${member.name}</p>
+          <button class="speak-btn mt-2 bg-gradient-to-r from-orange-400 to-pink-500 text-white px-4 py-2 rounded-full text-base font-bold flex items-center justify-center mx-auto gap-2 relative z-10">
+            🔊 Listen
+          </button>
         `;
         
-        piece.addEventListener('dragstart', handleDragStart);
-        piece.addEventListener('dragend', handleDragEnd);
+        card.onclick = (e) => {
+          e.stopPropagation();
+          
+          if (activeCard && activeCard !== card) {
+            activeCard.classList.remove('active');
+          }
+          
+          card.classList.toggle('active');
+          card.classList.add('bounce');
+          
+          activeCard = card.classList.contains('active') ? card : null;
+          
+          setTimeout(() => card.classList.remove('bounce'), 600);
+        };
         
-        piecesContainer.appendChild(piece);
+        const speakBtn = card.querySelector('.speak-btn');
+        speakBtn.onclick = (e) => {
+          e.stopPropagation();
+          showPronunciationMessage(member.name);
+        };
+        
+        grid.appendChild(card);
       });
       
-      const slots = document.querySelectorAll('.build-slot');
-      slots.forEach(slot => {
-        slot.addEventListener('dragover', handleDragOver);
-        slot.addEventListener('dragleave', handleDragLeave);
-        slot.addEventListener('drop', handleDrop);
+      document.addEventListener('click', (e) => {
+        if (activeCard && !e.target.closest('.family-card')) {
+          activeCard.classList.remove('active');
+          activeCard = null;
+        }
+      });
+    }
+    
+    function showPronunciationMessage(name) {
+      const existingMsg = document.getElementById('pronunciation-msg');
+      if (existingMsg) existingMsg.remove();
+      
+      const msg = document.createElement('div');
+      msg.id = 'pronunciation-msg';
+      msg.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-6 rounded-3xl shadow-2xl text-center z-50 animate-bounce';
+      msg.innerHTML = `
+        <div class="text-6xl mb-3">🔊</div>
+        <div class="text-4xl font-bold mb-2">${name}</div>
+        <div class="text-lg mt-3 opacity-90">Say it out loud!</div>
+      `;
+      
+      document.body.appendChild(msg);
+      
+      setTimeout(() => {
+        msg.style.animation = 'none';
+        msg.style.opacity = '0';
+        msg.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        msg.style.transition = 'all 0.3s ease';
+        setTimeout(() => msg.remove(), 300);
+      }, 2500);
+    }
+    
+    function startMemoryGame() {
+      matchedPairs = 0;
+      flippedCards = [];
+      const memoryGrid = document.getElementById('memory-grid');
+      memoryGrid.innerHTML = '';
+      
+      const gameMembers = familyMembers.slice(0, 5);
+      const cards = [...gameMembers, ...gameMembers];
+      memoryCards = cards.sort(() => Math.random() - 0.5);
+      
+      memoryCards.forEach((member, index) => {
+        const cardWrapper = document.createElement('div');
+        cardWrapper.className = 'relative h-32';
+        
+        const card = document.createElement('div');
+        card.className = 'memory-card w-full h-full';
+        card.dataset.index = index;
+        card.dataset.name = member.name;
+        
+        card.innerHTML = `
+          <div class="memory-card-front" style="background: ${defaultConfig.primary_color};">
+            <span class="text-5xl">❓</span>
+          </div>
+          <div class="memory-card-back" style="background: ${defaultConfig.secondary_color};">
+            <div>
+              <div class="text-4xl mb-1">${member.emoji}</div>
+              <div class="text-sm font-bold" style="color: ${defaultConfig.text_color}">${member.name}</div>
+            </div>
+          </div>
+        `;
+        
+        card.onclick = () => flipCard(card);
+        cardWrapper.appendChild(card);
+        memoryGrid.appendChild(cardWrapper);
       });
       
-      updateBuildScore();
+      updateMemoryScore();
+    }
+    
+    function flipCard(card) {
+      if (flippedCards.length >= 2 || card.classList.contains('flipped')) return;
+      
+      card.classList.add('flipped');
+      flippedCards.push(card);
+      
+      if (flippedCards.length === 2) {
+        setTimeout(checkMatch, 800);
+      }
+    }
+    
+    function checkMatch() {
+      const [card1, card2] = flippedCards;
+      const match = card1.dataset.name === card2.dataset.name;
+      
+      if (match) {
+        matchedPairs++;
+        card1.style.opacity = '0.5';
+        card2.style.opacity = '0.5';
+        updateMemoryScore();
+        
+        if (matchedPairs === 5) {
+          setTimeout(() => {
+            const feedback = document.getElementById('memory-score');
+            feedback.textContent = '🎉 Congratulations! You found all the pairs!';
+          }, 300);
+        }
+      } else {
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
+      }
+      
+      flippedCards = [];
+    }
+    
+    function updateMemoryScore() {
+      document.getElementById('memory-score').textContent = `Pairs found: ${matchedPairs}/5`;
+    }
+    
+    function startQuiz() {
+      quizMembers = [...familyMembers].sort(() => Math.random() - 0.5);
+      currentQuizIndex = 0;
+      showQuizQuestion();
+    }
+    
+    function showQuizQuestion() {
+      if (currentQuizIndex >= quizMembers.length) {
+        currentQuizIndex = 0;
+        quizMembers = [...familyMembers].sort(() => Math.random() - 0.5);
+      }
+      
+      const currentMember = quizMembers[currentQuizIndex];
+      document.getElementById('quiz-emoji').textContent = currentMember.emoji;
+      document.getElementById('quiz-question').textContent = 'Who is this family member?';
+      document.getElementById('quiz-feedback').textContent = '';
+      document.getElementById('next-quiz-btn').style.display = 'none';
+      
+      const wrongOptions = familyMembers
+        .filter(m => m.name !== currentMember.name)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+      
+      const options = [currentMember, ...wrongOptions].sort(() => Math.random() - 0.5);
+      
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+      
+      options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option px-6 py-4 text-2xl rounded-xl font-bold shadow-md';
+        btn.style.background = defaultConfig.secondary_color;
+        btn.style.color = defaultConfig.text_color;
+        btn.textContent = option.name;
+        btn.onclick = () => checkQuizAnswer(option.name === currentMember.name, btn);
+        optionsContainer.appendChild(btn);
+      });
+    }
+    
+    function checkQuizAnswer(isCorrect, btn) {
+      const allButtons = document.querySelectorAll('.quiz-option');
+      allButtons.forEach(b => b.disabled = true);
+      
+      if (isCorrect) {
+        btn.classList.add('correct');
+        document.getElementById('quiz-feedback').textContent = '🎉 Correct!';
+        document.getElementById('quiz-feedback').style.color = '#22c55e';
+      } else {
+        btn.classList.add('incorrect');
+        document.getElementById('quiz-feedback').textContent = '❌ Try again';
+        document.getElementById('quiz-feedback').style.color = '#ef4444';
+      }
+      
+      document.getElementById('next-quiz-btn').style.display = 'block';
+    }
+    
+    function nextQuizQuestion() {
+      currentQuizIndex++;
+      const allButtons = document.querySelectorAll('.quiz-option');
+      allButtons.forEach(b => {
+        b.disabled = false;
+        b.classList.remove('correct', 'incorrect');
+      });
+      showQuizQuestion();
+    }
+
+    // Drag and Drop Game
+    function createDragDropGame() {
+      const dragGame = document.getElementById('drag-game');
+      dragGame.innerHTML = '';
+      dragMatches = 0;
+      
+      const shuffledMembers = [...familyMembers].sort(() => Math.random() - 0.5);
+      
+      shuffledMembers.forEach(member => {
+        const dropZone = document.createElement('div');
+        dropZone.className = 'drop-zone rounded-2xl p-4 text-center border-4 border-dashed flex flex-col items-center justify-center';
+        dropZone.style.background = defaultConfig.secondary_color;
+        dropZone.style.borderColor = defaultConfig.primary_color;
+        dropZone.dataset.name = member.name;
+        
+        dropZone.innerHTML = `
+          <p class="text-2xl font-bold mb-2" style="color: ${defaultConfig.text_color}">${member.name}</p>
+          <div class="drop-area min-h-16 flex items-center justify-center">
+            <span class="text-4xl opacity-30">?</span>
+          </div>
+        `;
+        
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('drop', handleDrop);
+        dropZone.addEventListener('dragleave', handleDragLeave);
+        
+        dragGame.appendChild(dropZone);
+      });
+      
+      const shuffledEmojis = [...familyMembers].sort(() => Math.random() - 0.5);
+      
+      const emojiContainer = document.createElement('div');
+      emojiContainer.className = 'col-span-full mt-6 flex flex-wrap justify-center gap-4 p-6 rounded-2xl';
+      emojiContainer.style.background = 'rgba(37, 99, 235, 0.1)';
+      emojiContainer.id = 'drag-emojis';
+      
+      shuffledEmojis.forEach(member => {
+        const dragItem = document.createElement('div');
+        dragItem.className = 'drag-item rounded-xl p-4 shadow-lg text-center';
+        dragItem.style.background = defaultConfig.secondary_color;
+        dragItem.draggable = true;
+        dragItem.dataset.name = member.name;
+        dragItem.innerHTML = `<span class="text-5xl">${member.emoji}</span>`;
+        
+        dragItem.addEventListener('dragstart', handleDragStart);
+        dragItem.addEventListener('dragend', handleDragEnd);
+        
+        emojiContainer.appendChild(dragItem);
+      });
+      
+      dragGame.appendChild(emojiContainer);
+      updateDragScore();
     }
     
     function handleDragStart(e) {
-      draggedElement = e.target;
-      e.target.style.opacity = '0.5';
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', e.target.dataset.name);
     }
     
     function handleDragEnd(e) {
-      e.target.style.opacity = '1';
+      e.target.classList.remove('dragging');
     }
     
     function handleDragOver(e) {
       e.preventDefault();
-      if (!e.currentTarget.classList.contains('filled')) {
-        e.currentTarget.classList.add('highlight');
+      e.dataTransfer.dropEffect = 'move';
+      if (!e.currentTarget.classList.contains('matched')) {
+        e.currentTarget.classList.add('drag-over');
       }
     }
     
     function handleDragLeave(e) {
-      e.currentTarget.classList.remove('highlight');
+      e.currentTarget.classList.remove('drag-over');
     }
     
     function handleDrop(e) {
       e.preventDefault();
-      e.currentTarget.classList.remove('highlight');
+      e.currentTarget.classList.remove('drag-over');
       
-      if (draggedElement && !e.currentTarget.classList.contains('filled')) {
-        const slotRole = e.currentTarget.dataset.role;
-        const pieceRole = draggedElement.dataset.role;
+      const draggedName = e.dataTransfer.getData('text/plain');
+      const dropZoneName = e.currentTarget.dataset.name;
+      
+      if (draggedName === dropZoneName && !e.currentTarget.classList.contains('matched')) {
+        const draggedElement = document.querySelector(`.drag-item[data-name="${draggedName}"].dragging, .drag-item[data-name="${draggedName}"]`);
         
-        if (slotRole === pieceRole) {
-          const emoji = draggedElement.querySelector('.text-6xl').textContent;
-          e.currentTarget.innerHTML = `
-            <div class="text-6xl">${emoji}</div>
-          `;
-          e.currentTarget.classList.add('filled');
+        if (draggedElement) {
+          const dropArea = e.currentTarget.querySelector('.drop-area');
+          dropArea.innerHTML = draggedElement.innerHTML;
           draggedElement.remove();
-          buildScore++;
-          updateBuildScore();
           
-          if (buildScore === 7) {
+          e.currentTarget.classList.add('matched');
+          dragMatches++;
+          updateDragScore();
+          
+          if (dragMatches === familyMembers.length) {
             setTimeout(() => {
-              showCelebration();
-              document.getElementById('build-score').textContent = '🎉 Perfect! Tree Complete!';
+              const scoreEl = document.getElementById('drag-score');
+              scoreEl.textContent = '🎉 Perfect! You matched them all!';
             }, 300);
           }
-        } else {
-          e.currentTarget.classList.add('wiggle');
-          setTimeout(() => e.currentTarget.classList.remove('wiggle'), 500);
         }
       }
     }
     
-    function updateBuildScore() {
-      document.getElementById('build-score').textContent = `Placed: ${buildScore}/7`;
+    function updateDragScore() {
+      document.getElementById('drag-score').textContent = `Matches: ${dragMatches}/${familyMembers.length}`;
     }
     
-    function initMysteryGame() {
-      currentMysteryIndex = 0;
-      showMysteryQuestion();
+    function resetDragGame() {
+      createDragDropGame();
+    }
+
+    // Pair Finding Game
+    function startPairGame() {
+      pairMatches = 0;
+      selectedPairCards = [];
+      const pairGrid = document.getElementById('pair-grid');
+      pairGrid.innerHTML = '';
+      
+      const gameMembers = familyMembers.slice(0, 5);
+      const cards = [...gameMembers, ...gameMembers];
+      pairGameCards = cards.sort(() => Math.random() - 0.5);
+      
+      pairGameCards.forEach((member, index) => {
+        const card = document.createElement('div');
+        card.className = 'pair-card rounded-2xl p-6 text-center shadow-lg';
+        card.style.background = defaultConfig.secondary_color;
+        card.dataset.index = index;
+        card.dataset.name = member.name;
+        
+        card.innerHTML = `
+          <div class="text-6xl mb-2">${member.emoji}</div>
+          <p class="text-lg font-bold" style="color: ${defaultConfig.text_color}">${member.name}</p>
+        `;
+        
+        card.onclick = () => selectPairCard(card);
+        pairGrid.appendChild(card);
+      });
+      
+      updatePairScore();
     }
     
-    function showMysteryQuestion() {
-      const mysteryCard = document.querySelector('.mystery-card');
-      mysteryCard.classList.remove('flipped');
+    function selectPairCard(card) {
+      if (card.classList.contains('matched') || card.classList.contains('selected')) return;
+      if (selectedPairCards.length >= 2) return;
       
-      const currentClue = mysteryClues[currentMysteryIndex];
-      const clueContent = document.getElementById('clue-content');
-      clueContent.innerHTML = `
-        <div class="text-7xl mb-4">${currentClue.emoji}</div>
-        <p class="text-2xl font-bold">${currentClue.clue}</p>
-      `;
+      card.classList.add('selected');
+      selectedPairCards.push(card);
       
-      const optionsContainer = document.getElementById('mystery-options');
+      if (selectedPairCards.length === 2) {
+        setTimeout(checkPairMatch, 600);
+      }
+    }
+    
+    function checkPairMatch() {
+      const [card1, card2] = selectedPairCards;
+      
+      if (card1.dataset.name === card2.dataset.name && card1.dataset.index !== card2.dataset.index) {
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+        card1.classList.remove('selected');
+        card2.classList.remove('selected');
+        pairMatches++;
+        updatePairScore();
+        
+        if (pairMatches === 5) {
+          setTimeout(() => {
+            const scoreEl = document.getElementById('pair-score');
+            scoreEl.textContent = '🎉 Amazing! You found all pairs!';
+          }, 300);
+        }
+      } else {
+        card1.classList.remove('selected');
+        card2.classList.remove('selected');
+      }
+      
+      selectedPairCards = [];
+    }
+    
+    function updatePairScore() {
+      document.getElementById('pair-score').textContent = `Pairs found: ${pairMatches}/5`;
+    }
+
+    // Counting Game
+    function startCountingGame() {
+      showCountingQuestion();
+    }
+    
+    function showCountingQuestion() {
+      const member = familyMembers[Math.floor(Math.random() * familyMembers.length)];
+      const count = Math.floor(Math.random() * 5) + 2; // 2-6 emojis
+      currentCountAnswer = count;
+      
+      const emojisContainer = document.getElementById('count-emojis');
+      emojisContainer.innerHTML = '';
+      
+      for (let i = 0; i < count; i++) {
+        const emoji = document.createElement('span');
+        emoji.textContent = member.emoji;
+        emoji.className = 'animate-bounce';
+        emoji.style.animationDelay = `${i * 0.1}s`;
+        emojisContainer.appendChild(emoji);
+      }
+      
+      const options = [count];
+      while (options.length < 3) {
+        const randomNum = Math.floor(Math.random() * 7) + 1;
+        if (!options.includes(randomNum)) {
+          options.push(randomNum);
+        }
+      }
+      options.sort(() => Math.random() - 0.5);
+      
+      const optionsContainer = document.getElementById('count-options');
       optionsContainer.innerHTML = '';
       
-      const wrongOptions = familyMembers
-        .filter(m => m.role !== currentClue.role)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
-      
-      const correctMember = familyMembers.find(m => m.role === currentClue.role);
-      const allOptions = [correctMember, ...wrongOptions].sort(() => Math.random() - 0.5);
-      
-      allOptions.forEach(option => {
+      options.forEach(num => {
         const btn = document.createElement('button');
-        btn.className = 'px-6 py-4 rounded-2xl font-bold text-2xl shadow-lg transition-all hover:scale-105';
-        btn.textContent = `${option.emoji} ${option.name}`;
-        btn.onclick = () => checkMysteryAnswer(option.role === currentClue.role, btn);
+        btn.className = 'count-option px-8 py-6 text-4xl rounded-2xl font-bold shadow-lg';
+        btn.style.background = defaultConfig.secondary_color;
+        btn.style.color = defaultConfig.text_color;
+        btn.textContent = num;
+        btn.onclick = () => checkCountAnswer(num, btn);
         optionsContainer.appendChild(btn);
       });
       
-      document.getElementById('mystery-feedback').textContent = '';
-      document.getElementById('next-mystery-btn').style.display = 'none';
+      document.getElementById('count-feedback').textContent = '';
+      document.getElementById('next-count-btn').style.display = 'none';
     }
     
-    function revealClue() {
-      document.querySelector('.mystery-card').classList.add('flipped');
-    }
-    
-    function checkMysteryAnswer(isCorrect, btn) {
-      const allButtons = document.querySelectorAll('#mystery-options button');
+    function checkCountAnswer(selected, btn) {
+      const allButtons = document.querySelectorAll('.count-option');
       allButtons.forEach(b => b.disabled = true);
       
-      if (isCorrect) {
+      if (selected === currentCountAnswer) {
+        btn.classList.add('correct');
         btn.style.background = '#4ade80';
         btn.style.color = 'white';
-        document.getElementById('mystery-feedback').textContent = '🎉 Correct!';
-        document.getElementById('mystery-feedback').style.color = '#22c55e';
+        document.getElementById('count-feedback').textContent = '🎉 Correct!';
+        document.getElementById('count-feedback').style.color = '#22c55e';
       } else {
+        btn.classList.add('incorrect');
         btn.style.background = '#f87171';
         btn.style.color = 'white';
-        document.getElementById('mystery-feedback').textContent = '❌ Try the next one!';
-        document.getElementById('mystery-feedback').style.color = '#ef4444';
+        document.getElementById('count-feedback').textContent = `❌ Not quite! The answer is ${currentCountAnswer}`;
+        document.getElementById('count-feedback').style.color = '#ef4444';
       }
       
-      document.getElementById('next-mystery-btn').style.display = 'block';
+      document.getElementById('next-count-btn').style.display = 'block';
     }
     
-    function nextMystery() {
-      currentMysteryIndex = (currentMysteryIndex + 1) % mysteryClues.length;
-      const allButtons = document.querySelectorAll('#mystery-options button');
+    function nextCountQuestion() {
+      const allButtons = document.querySelectorAll('.count-option');
       allButtons.forEach(b => {
         b.disabled = false;
-        b.style.background = '';
-        b.style.color = '';
+        b.classList.remove('correct', 'incorrect');
+        b.style.background = defaultConfig.secondary_color;
+        b.style.color = defaultConfig.text_color;
       });
-      showMysteryQuestion();
+      showCountingQuestion();
+    }
+
+    // Listen and Find Game
+    function startListenGame() {
+      listenAttempts = 0;
+      listenCorrect = 0;
+      nextListenRound();
     }
     
-    function initRelationshipQuiz() {
-      const quizContainer = document.getElementById('relationship-quiz');
-      quizContainer.innerHTML = '';
+    function nextListenRound() {
+      currentListenMember = familyMembers[Math.floor(Math.random() * familyMembers.length)];
       
-      relationships.forEach((rel, index) => {
-        const item = document.createElement('div');
-        item.className = 'rounded-3xl p-6 shadow-lg';
-        item.innerHTML = `
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <span class="text-5xl">${rel.person1}</span>
-            <p class="text-2xl font-bold flex-1 text-center">${rel.relationship}</p>
-            <select class="relationship-select px-6 py-3 text-xl rounded-xl border-4 font-bold" data-answer="${rel.answer}">
-              <option value="">Choose...</option>
-              <option value="dad">👨 Dad</option>
-              <option value="mom">👩 Mom</option>
-              <option value="grandpa">👴 Grandpa</option>
-              <option value="grandma">👵 Grandma</option>
-              <option value="brother">🧒 Brother</option>
-              <option value="sister">👧 Sister</option>
-              <option value="baby">👶 Baby</option>
-            </select>
-          </div>
-        `;
-        quizContainer.appendChild(item);
-      });
-    }
-    
-    function checkRelationships() {
-      const selects = document.querySelectorAll('.relationship-select');
-      let correct = 0;
+      const listenGrid = document.getElementById('listen-grid');
+      listenGrid.innerHTML = '';
       
-      selects.forEach(select => {
-        if (select.value === select.dataset.answer) {
-          select.style.borderColor = '#22c55e';
-          select.style.background = '#d1fae5';
-          correct++;
-        } else {
-          select.style.borderColor = '#ef4444';
-          select.style.background = '#fee2e2';
+      const options = [currentListenMember];
+      while (options.length < 5) {
+        const randomMember = familyMembers[Math.floor(Math.random() * familyMembers.length)];
+        if (!options.find(m => m.name === randomMember.name)) {
+          options.push(randomMember);
         }
+      }
+      options.sort(() => Math.random() - 0.5);
+      
+      options.forEach(member => {
+        const card = document.createElement('div');
+        card.className = 'pair-card rounded-2xl p-6 text-center shadow-lg';
+        card.style.background = defaultConfig.secondary_color;
+        card.dataset.name = member.name;
+        
+        card.innerHTML = `
+          <div class="text-7xl mb-2">${member.emoji}</div>
+          <p class="text-xl font-bold" style="color: ${defaultConfig.text_color}">${member.name}</p>
+        `;
+        
+        card.onclick = () => checkListenAnswer(card, member.name === currentListenMember.name);
+        listenGrid.appendChild(card);
       });
       
-      const scoreEl = document.getElementById('relationship-score');
-      if (correct === relationships.length) {
-        scoreEl.textContent = '🎉 Perfect! All relationships correct!';
-        scoreEl.style.color = '#22c55e';
-        setTimeout(() => {
-          document.getElementById('completion-screen').style.display = 'block';
-          showCelebration();
-        }, 1500);
+      document.getElementById('listen-feedback').textContent = '';
+      document.getElementById('next-listen-btn').style.display = 'none';
+      updateListenScore();
+    }
+    
+    function playListenSound() {
+      if (!currentListenMember) {
+        startListenGame();
+        return;
+      }
+      
+      const msg = document.createElement('div');
+      msg.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-12 py-8 rounded-3xl shadow-2xl text-center z-50';
+      msg.style.animation = 'bounce 0.6s ease';
+      msg.innerHTML = `
+        <div class="text-8xl mb-4">🔊</div>
+        <div class="text-5xl font-bold">${currentListenMember.name}</div>
+      `;
+      
+      document.body.appendChild(msg);
+      
+      setTimeout(() => {
+        msg.style.opacity = '0';
+        msg.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        msg.style.transition = 'all 0.3s ease';
+        setTimeout(() => msg.remove(), 300);
+      }, 2000);
+    }
+    
+    function checkListenAnswer(card, isCorrect) {
+      const allCards = document.querySelectorAll('#listen-grid .pair-card');
+      allCards.forEach(c => c.style.pointerEvents = 'none');
+      
+      listenAttempts++;
+      
+      if (isCorrect) {
+        listenCorrect++;
+        card.style.background = '#4ade80';
+        card.style.transform = 'scale(1.1)';
+        document.getElementById('listen-feedback').textContent = '🎉 Excellent listening!';
+        document.getElementById('listen-feedback').style.color = '#22c55e';
       } else {
-        scoreEl.textContent = `${correct}/${relationships.length} correct. Try again!`;
-        scoreEl.style.color = '#f59e0b';
+        card.style.background = '#f87171';
+        card.style.animation = 'shake 0.5s ease';
+        document.getElementById('listen-feedback').textContent = `❌ Not quite! It was ${currentListenMember.name}`;
+        document.getElementById('listen-feedback').style.color = '#ef4444';
+        
+        const correctCard = Array.from(allCards).find(c => c.dataset.name === currentListenMember.name);
+        if (correctCard) {
+          setTimeout(() => {
+            correctCard.style.background = '#4ade80';
+            correctCard.style.transform = 'scale(1.1)';
+          }, 500);
+        }
       }
+      
+      updateListenScore();
+      document.getElementById('next-listen-btn').style.display = 'block';
     }
     
-    function showCelebration() {
-      for (let i = 0; i < 30; i++) {
-        setTimeout(() => {
-          const confetti = document.createElement('div');
-          confetti.className = 'celebration-confetti';
-          confetti.style.left = Math.random() * 100 + '%';
-          confetti.style.background = ['#ec4899', '#f59e0b', '#3b82f6', '#22c55e', '#a855f7'][Math.floor(Math.random() * 5)];
-          confetti.style.animationDelay = Math.random() * 0.5 + 's';
-          document.body.appendChild(confetti);
-          
-          setTimeout(() => confetti.remove(), 3000);
-        }, i * 100);
-      }
+    function updateListenScore() {
+      document.getElementById('listen-score').textContent = `Score: ${listenCorrect}/${listenAttempts}`;
     }
     
-    function playAgain() {
-      buildScore = 0;
-      document.getElementById('completion-screen').style.display = 'none';
-      document.querySelectorAll('.build-slot').forEach(slot => {
-        slot.classList.remove('filled');
-        const role = slot.dataset.role;
-        const member = familyMembers.find(m => m.role === role);
-        slot.innerHTML = `
-          <span class="text-sm font-bold mb-2">${member.name}</span>
-          <span class="text-5xl opacity-30">${member.emoji}</span>
-        `;
+    function nextListenQuestion() {
+      const allCards = document.querySelectorAll('#listen-grid .pair-card');
+      allCards.forEach(c => {
+        c.style.pointerEvents = 'auto';
+        c.style.background = defaultConfig.secondary_color;
+        c.style.transform = 'scale(1)';
+        c.style.animation = 'none';
       });
-      initBuildingGame();
-      initMysteryGame();
-      initRelationshipQuiz();
-      document.getElementById('relationship-score').textContent = '';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      nextListenRound();
     }
+    
     
     async function onConfigChange(config) {
       const customFont = config.font_family || defaultConfig.font_family;
       const baseSize = config.font_size || defaultConfig.font_size;
-      const baseFontStack = 'cursive';
+      const baseFontStack = 'sans-serif';
       
       document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
       document.body.style.background = config.background_color || defaultConfig.background_color;
       
       document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
-      document.getElementById('main-title').style.fontSize = `${baseSize * 4.375}px`;
+      document.getElementById('main-title').style.fontSize = `${baseSize * 3.75}px`;
       document.getElementById('main-title').style.color = config.text_color || defaultConfig.text_color;
       
-      document.getElementById('welcome-message').textContent = config.welcome_message || defaultConfig.welcome_message;
-      document.getElementById('welcome-message').style.fontSize = `${baseSize * 1.875}px`;
-      document.getElementById('welcome-message').style.color = config.text_color || defaultConfig.text_color;
+      document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+      document.getElementById('subtitle').style.fontSize = `${baseSize * 1.875}px`;
+      document.getElementById('subtitle').style.color = config.text_color || defaultConfig.text_color;
       
-      document.getElementById('complete-message').textContent = config.complete_message || defaultConfig.complete_message;
-      document.getElementById('complete-message').style.color = config.text_color || defaultConfig.text_color;
+      document.getElementById('vocab-title').style.fontSize = `${baseSize * 2.5}px`;
+      document.getElementById('vocab-title').style.color = config.text_color || defaultConfig.text_color;
       
-      const startBtn = document.getElementById('start-game-btn');
-      startBtn.textContent = config.start_button_text || defaultConfig.start_button_text;
-      startBtn.style.background = config.primary_color || defaultConfig.primary_color;
-      startBtn.style.color = config.secondary_color || defaultConfig.secondary_color;
+      document.getElementById('instruction-text').style.fontSize = `${baseSize * 1.25}px`;
+      document.getElementById('instruction-text').style.color = config.text_color || defaultConfig.text_color;
       
-      const allButtons = document.querySelectorAll('button');
-      allButtons.forEach(btn => {
-        if (!btn.style.background || btn.style.background === '') {
-          btn.style.background = config.primary_color || defaultConfig.primary_color;
-          btn.style.color = config.secondary_color || defaultConfig.secondary_color;
-        }
-      });
+      document.getElementById('memory-title').textContent = config.memory_game_title || defaultConfig.memory_game_title;
+      document.getElementById('memory-title').style.fontSize = `${baseSize * 2.5}px`;
+      document.getElementById('memory-title').style.color = config.text_color || defaultConfig.text_color;
       
-      const buildSlots = document.querySelectorAll('.build-slot');
-      buildSlots.forEach(slot => {
-        slot.style.background = config.secondary_color || defaultConfig.secondary_color;
-        slot.style.borderColor = config.primary_color || defaultConfig.primary_color;
-      });
+      document.getElementById('quiz-title').textContent = config.quiz_game_title || defaultConfig.quiz_game_title;
+      document.getElementById('quiz-title').style.fontSize = `${baseSize * 2.5}px`;
+      document.getElementById('quiz-title').style.color = config.text_color || defaultConfig.text_color;
       
-      const pieces = document.querySelectorAll('.building-game-piece');
-      pieces.forEach(piece => {
-        piece.style.background = config.secondary_color || defaultConfig.secondary_color;
-      });
+      const startMemoryBtn = document.getElementById('start-memory-btn');
+      startMemoryBtn.style.background = config.primary_color || defaultConfig.primary_color;
+      startMemoryBtn.style.color = config.secondary_color || defaultConfig.secondary_color;
+      startMemoryBtn.style.fontSize = `${baseSize * 1.5}px`;
       
-      const titles = document.querySelectorAll('h2');
-      titles.forEach(title => {
-        title.style.color = config.text_color || defaultConfig.text_color;
-      });
+      const nextQuizBtn = document.getElementById('next-quiz-btn');
+      nextQuizBtn.style.background = config.accent_color || defaultConfig.accent_color;
+      nextQuizBtn.style.color = config.secondary_color || defaultConfig.secondary_color;
+      nextQuizBtn.style.fontSize = `${baseSize * 1.5}px`;
+      
+      document.getElementById('memory-score').style.fontSize = `${baseSize * 1.5}px`;
+      document.getElementById('memory-score').style.color = config.text_color || defaultConfig.text_color;
+      
+      document.getElementById('quiz-question').style.fontSize = `${baseSize * 1.875}px`;
+      document.getElementById('quiz-question').style.color = config.text_color || defaultConfig.text_color;
+      
+      document.getElementById('quiz-feedback').style.fontSize = `${baseSize * 1.5}px`;
     }
     
     if (window.elementSdk) {
@@ -702,19 +1044,27 @@
         }),
         mapToEditPanelValues: (config) => new Map([
           ['main_title', config.main_title || defaultConfig.main_title],
-          ['welcome_message', config.welcome_message || defaultConfig.welcome_message],
-          ['start_button_text', config.start_button_text || defaultConfig.start_button_text],
-          ['complete_message', config.complete_message || defaultConfig.complete_message]
+          ['subtitle', config.subtitle || defaultConfig.subtitle],
+          ['memory_game_title', config.memory_game_title || defaultConfig.memory_game_title],
+          ['quiz_game_title', config.quiz_game_title || defaultConfig.quiz_game_title]
         ])
       });
     }
     
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('start-game-btn').onclick = startGame;
-      document.getElementById('reveal-clue-btn').onclick = revealClue;
-      document.getElementById('next-mystery-btn').onclick = nextMystery;
-      document.getElementById('check-relationships-btn').onclick = checkRelationships;
-      document.getElementById('play-again-btn').onclick = playAgain;
+      createVocabularyCards();
+      document.getElementById('start-memory-btn').onclick = startMemoryGame;
+      document.getElementById('next-quiz-btn').onclick = nextQuizQuestion;
+      document.getElementById('reset-drag-btn').onclick = resetDragGame;
+      document.getElementById('start-pair-btn').onclick = startPairGame;
+      document.getElementById('next-count-btn').onclick = nextCountQuestion;
+      document.getElementById('play-sound-btn').onclick = playListenSound;
+      document.getElementById('next-listen-btn').onclick = nextListenQuestion;
+      
+      startQuiz();
+      createDragDropGame();
+      startCountingGame();
+      startListenGame();
       
       if (window.elementSdk) {
         onConfigChange(window.elementSdk.config);
@@ -723,5 +1073,5 @@
       }
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bf5451d6273cfec',t:'MTc2ODY0Njc5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bf5451e71ebc112',t:'MTc2ODY0Njc5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
