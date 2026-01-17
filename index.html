@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Tree Adventure</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Chewy&display=swap');
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Chewy', cursive;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .tree-branch {
+      position: relative;
+      animation: growBranch 0.8s ease-out;
+    }
+    
+    @keyframes growBranch {
+      from {
+        transform: scaleY(0);
+        opacity: 0;
+      }
+      to {
+        transform: scaleY(1);
+        opacity: 1;
+      }
+    }
+    
+    .family-bubble {
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .family-bubble:hover {
+      transform: scale(1.15) rotate(5deg);
+      z-index: 10;
+    }
+    
+    .family-bubble.revealed {
+      animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    @keyframes popIn {
+      0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2) rotate(10deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+    
+    .connection-line {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, #8b4513, transparent);
+      height: 3px;
+      transform-origin: left;
+      animation: drawLine 0.8s ease-out;
+    }
+    
+    @keyframes drawLine {
+      from {
+        width: 0;
+      }
+      to {
+        width: 100%;
+      }
+    }
+    
+    .mystery-card {
+      transition: all 0.5s ease;
+      cursor: pointer;
+      perspective: 1000px;
+    }
+    
+    .mystery-card:hover {
+      transform: translateY(-10px);
+    }
+    
+    .mystery-card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .card-back {
+      transform: rotateY(180deg);
+    }
+    
+    .relationship-connector {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+    }
+    
+    .celebration-confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: confettiFall 3s ease-out forwards;
+      pointer-events: none;
+    }
+    
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+    
+    .building-game-piece {
+      transition: all 0.3s ease;
+      cursor: grab;
+    }
+    
+    .building-game-piece:active {
+      cursor: grabbing;
+      transform: scale(1.1);
+    }
+    
+    .build-slot {
+      transition: all 0.3s ease;
+      min-height: 100px;
+    }
+    
+    .build-slot.highlight {
+      background: rgba(255, 215, 0, 0.3) !important;
+      border: 3px solid gold !important;
+      transform: scale(1.05);
+    }
+    
+    .build-slot.filled {
+      border-color: #22c55e !important;
+    }
+    
+    .wiggle {
+      animation: wiggle 0.5s ease;
+    }
+    
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto"><!-- Welcome Screen -->
+   <div id="welcome-screen" class="w-full min-h-screen flex flex-col items-center justify-center px-6 py-12">
+    <div class="text-center max-w-4xl">
+     <div class="text-9xl mb-8 animate-bounce">
+      🏡
+     </div>
+     <h1 id="main-title" class="text-7xl font-bold mb-6">Family Tree Adventure</h1>
+     <p id="welcome-message" class="text-3xl mb-12">Build your family tree and learn relationships!</p><button id="start-game-btn" class="px-16 py-8 text-4xl rounded-full font-bold shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110"> 🌳 Start Adventure </button>
+    </div>
+   </div><!-- Main Game Area -->
+   <div id="game-area" class="w-full px-6 py-12" style="display: none;"><!-- Game 1: Build Your Tree -->
+    <section class="max-w-6xl mx-auto mb-20">
+     <h2 class="text-5xl font-bold text-center mb-4">🌳 Build Your Family Tree</h2>
+     <p class="text-2xl text-center mb-8">Drag family members to their correct place!</p>
+     <div class="relative"><!-- Tree Structure -->
+      <div class="flex flex-col items-center gap-8"><!-- Grandparents Level -->
+       <div class="flex justify-center gap-16 mb-4">
+        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="grandpa"><span class="text-sm font-bold mb-2">Grandpa</span> <span class="text-5xl opacity-30">👴</span>
+        </div>
+        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="grandma"><span class="text-sm font-bold mb-2">Grandma</span> <span class="text-5xl opacity-30">👵</span>
+        </div>
+       </div><!-- Parents Level -->
+       <div class="flex justify-center gap-16 mb-4">
+        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="dad"><span class="text-sm font-bold mb-2">Dad</span> <span class="text-5xl opacity-30">👨</span>
+        </div>
+        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-40 h-40 flex flex-col items-center justify-center" data-role="mom"><span class="text-sm font-bold mb-2">Mom</span> <span class="text-5xl opacity-30">👩</span>
+        </div>
+       </div><!-- Children Level -->
+       <div class="flex justify-center gap-8">
+        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-32 h-32 flex flex-col items-center justify-center" data-role="brother"><span class="text-xs font-bold mb-1">Brother</span> <span class="text-4xl opacity-30">🧒</span>
+        </div>
+        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-32 h-32 flex flex-col items-center justify-center" data-role="sister"><span class="text-xs font-bold mb-1">Sister</span> <span class="text-4xl opacity-30">👧</span>
+        </div>
+        <div class="build-slot rounded-3xl p-6 border-4 border-dashed w-32 h-32 flex flex-col items-center justify-center" data-role="baby"><span class="text-xs font-bold mb-1">Baby</span> <span class="text-4xl opacity-30">👶</span>
+        </div>
+       </div>
+      </div><!-- Draggable Pieces -->
+      <div class="mt-12 p-8 rounded-3xl">
+       <p class="text-2xl font-bold text-center mb-6">👇 Drag these family members:</p>
+       <div id="building-pieces" class="flex flex-wrap justify-center gap-6"><!-- Pieces will be inserted here -->
+       </div>
+      </div>
+      <div class="text-center mt-8">
+       <p id="build-score" class="text-3xl font-bold">Placed: 0/7</p>
+      </div>
+     </div>
+    </section><!-- Game 2: Mystery Family Member -->
+    <section class="max-w-6xl mx-auto mb-20">
+     <h2 class="text-5xl font-bold text-center mb-4">🎭 Who Am I?</h2>
+     <p class="text-2xl text-center mb-8">Read the clues and guess the family member!</p>
+     <div class="max-w-2xl mx-auto">
+      <div class="mystery-card rounded-3xl shadow-2xl p-8 h-96">
+       <div class="card-inner">
+        <div class="card-front flex flex-col items-center justify-center">
+         <div class="text-8xl mb-6">
+          ❓
+         </div><button id="reveal-clue-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg"> Show Clue </button>
+        </div>
+        <div class="card-back">
+         <div id="clue-content" class="text-center"><!-- Clue content will be inserted here -->
+         </div>
+        </div>
+       </div>
+      </div>
+      <div id="mystery-options" class="grid grid-cols-2 gap-4 mt-8"><!-- Options will be inserted here -->
+      </div>
+      <div class="text-center mt-6">
+       <p id="mystery-feedback" class="text-3xl font-bold min-h-12"></p><button id="next-mystery-btn" class="px-8 py-4 text-2xl rounded-full font-bold shadow-lg mt-4" style="display: none;"> Next Mystery </button>
+      </div>
+     </div>
+    </section><!-- Game 3: Relationship Quiz -->
+    <section class="max-w-6xl mx-auto mb-20">
+     <h2 class="text-5xl font-bold text-center mb-4">💕 Family Relationships</h2>
+     <p class="text-2xl text-center mb-8">Connect the relationships correctly!</p>
+     <div class="max-w-4xl mx-auto">
+      <div id="relationship-quiz" class="space-y-6"><!-- Quiz items will be inserted here -->
+      </div>
+      <div class="text-center mt-8"><button id="check-relationships-btn" class="px-10 py-5 text-3xl rounded-full font-bold shadow-xl"> Check Answers </button>
+       <p id="relationship-score" class="text-3xl font-bold mt-6 min-h-12"></p>
+      </div>
+     </div>
+    </section><!-- Completion Screen -->
+    <div id="completion-screen" class="text-center py-20" style="display: none;">
+     <div class="text-9xl mb-6 animate-bounce">
+      🎉
+     </div>
+     <h2 id="complete-message" class="text-6xl font-bold mb-8">You're a Family Expert!</h2>
+     <p class="text-3xl mb-8">You've mastered all the family relationships!</p><button id="play-again-btn" class="px-12 py-6 text-3xl rounded-full font-bold shadow-2xl"> 🔄 Play Again </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: '#fef3c7',
+      primary_color: '#f59e0b',
+      secondary_color: '#ffffff',
+      text_color: '#78350f',
+      accent_color: '#ec4899',
+      font_family: 'Chewy',
+      font_size: 16,
+      main_title: 'Family Tree Adventure',
+      welcome_message: 'Build your family tree and learn relationships!',
+      start_button_text: '🌳 Start Adventure',
+      complete_message: "You're a Family Expert!"
+    };
+    
+    const familyMembers = [
+      { role: 'grandpa', emoji: '👴', name: 'Grandpa' },
+      { role: 'grandma', emoji: '👵', name: 'Grandma' },
+      { role: 'dad', emoji: '👨', name: 'Dad' },
+      { role: 'mom', emoji: '👩', name: 'Mom' },
+      { role: 'brother', emoji: '🧒', name: 'Brother' },
+      { role: 'sister', emoji: '👧', name: 'Sister' },
+      { role: 'baby', emoji: '👶', name: 'Baby' }
+    ];
+    
+    const mysteryClues = [
+      { role: 'dad', clue: "I'm your parent who is a man. I might take you to play sports!", emoji: '👨' },
+      { role: 'mom', clue: "I'm your parent who is a woman. I love taking care of you!", emoji: '👩' },
+      { role: 'grandpa', clue: "I'm your dad's dad or your mom's dad. I tell great stories!", emoji: '👴' },
+      { role: 'grandma', clue: "I'm your dad's mom or your mom's mom. I bake cookies!", emoji: '👵' },
+      { role: 'sister', clue: "I'm your sibling who is a girl. We share the same parents!", emoji: '👧' },
+      { role: 'brother', clue: "I'm your sibling who is a boy. We play together!", emoji: '🧒' },
+      { role: 'baby', clue: "I'm the youngest in the family. Goo goo ga ga!", emoji: '👶' }
+    ];
+    
+    const relationships = [
+      { person1: '👨', relationship: 'is the husband of', person2: '👩', answer: 'mom' },
+      { person1: '👴', relationship: 'is the father of', person2: '👨', answer: 'dad' },
+      { person1: '👧', relationship: 'is the sister of', person2: '🧒', answer: 'brother' },
+      { person1: '👵', relationship: 'is the grandma of', person2: '👶', answer: 'baby' }
+    ];
+    
+    let buildScore = 0;
+    let currentMysteryIndex = 0;
+    let draggedElement = null;
+    
+    function startGame() {
+      document.getElementById('welcome-screen').style.display = 'none';
+      document.getElementById('game-area').style.display = 'block';
+      initBuildingGame();
+      initMysteryGame();
+      initRelationshipQuiz();
+    }
+    
+    function initBuildingGame() {
+      const piecesContainer = document.getElementById('building-pieces');
+      piecesContainer.innerHTML = '';
+      
+      const shuffled = [...familyMembers].sort(() => Math.random() - 0.5);
+      
+      shuffled.forEach(member => {
+        const piece = document.createElement('div');
+        piece.className = 'building-game-piece rounded-2xl p-6 shadow-xl text-center';
+        piece.draggable = true;
+        piece.dataset.role = member.role;
+        piece.innerHTML = `
+          <div class="text-6xl mb-2">${member.emoji}</div>
+          <p class="text-lg font-bold">${member.name}</p>
+        `;
+        
+        piece.addEventListener('dragstart', handleDragStart);
+        piece.addEventListener('dragend', handleDragEnd);
+        
+        piecesContainer.appendChild(piece);
+      });
+      
+      const slots = document.querySelectorAll('.build-slot');
+      slots.forEach(slot => {
+        slot.addEventListener('dragover', handleDragOver);
+        slot.addEventListener('dragleave', handleDragLeave);
+        slot.addEventListener('drop', handleDrop);
+      });
+      
+      updateBuildScore();
+    }
+    
+    function handleDragStart(e) {
+      draggedElement = e.target;
+      e.target.style.opacity = '0.5';
+    }
+    
+    function handleDragEnd(e) {
+      e.target.style.opacity = '1';
+    }
+    
+    function handleDragOver(e) {
+      e.preventDefault();
+      if (!e.currentTarget.classList.contains('filled')) {
+        e.currentTarget.classList.add('highlight');
+      }
+    }
+    
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('highlight');
+    }
+    
+    function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('highlight');
+      
+      if (draggedElement && !e.currentTarget.classList.contains('filled')) {
+        const slotRole = e.currentTarget.dataset.role;
+        const pieceRole = draggedElement.dataset.role;
+        
+        if (slotRole === pieceRole) {
+          const emoji = draggedElement.querySelector('.text-6xl').textContent;
+          e.currentTarget.innerHTML = `
+            <div class="text-6xl">${emoji}</div>
+          `;
+          e.currentTarget.classList.add('filled');
+          draggedElement.remove();
+          buildScore++;
+          updateBuildScore();
+          
+          if (buildScore === 7) {
+            setTimeout(() => {
+              showCelebration();
+              document.getElementById('build-score').textContent = '🎉 Perfect! Tree Complete!';
+            }, 300);
+          }
+        } else {
+          e.currentTarget.classList.add('wiggle');
+          setTimeout(() => e.currentTarget.classList.remove('wiggle'), 500);
+        }
+      }
+    }
+    
+    function updateBuildScore() {
+      document.getElementById('build-score').textContent = `Placed: ${buildScore}/7`;
+    }
+    
+    function initMysteryGame() {
+      currentMysteryIndex = 0;
+      showMysteryQuestion();
+    }
+    
+    function showMysteryQuestion() {
+      const mysteryCard = document.querySelector('.mystery-card');
+      mysteryCard.classList.remove('flipped');
+      
+      const currentClue = mysteryClues[currentMysteryIndex];
+      const clueContent = document.getElementById('clue-content');
+      clueContent.innerHTML = `
+        <div class="text-7xl mb-4">${currentClue.emoji}</div>
+        <p class="text-2xl font-bold">${currentClue.clue}</p>
+      `;
+      
+      const optionsContainer = document.getElementById('mystery-options');
+      optionsContainer.innerHTML = '';
+      
+      const wrongOptions = familyMembers
+        .filter(m => m.role !== currentClue.role)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+      
+      const correctMember = familyMembers.find(m => m.role === currentClue.role);
+      const allOptions = [correctMember, ...wrongOptions].sort(() => Math.random() - 0.5);
+      
+      allOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'px-6 py-4 rounded-2xl font-bold text-2xl shadow-lg transition-all hover:scale-105';
+        btn.textContent = `${option.emoji} ${option.name}`;
+        btn.onclick = () => checkMysteryAnswer(option.role === currentClue.role, btn);
+        optionsContainer.appendChild(btn);
+      });
+      
+      document.getElementById('mystery-feedback').textContent = '';
+      document.getElementById('next-mystery-btn').style.display = 'none';
+    }
+    
+    function revealClue() {
+      document.querySelector('.mystery-card').classList.add('flipped');
+    }
+    
+    function checkMysteryAnswer(isCorrect, btn) {
+      const allButtons = document.querySelectorAll('#mystery-options button');
+      allButtons.forEach(b => b.disabled = true);
+      
+      if (isCorrect) {
+        btn.style.background = '#4ade80';
+        btn.style.color = 'white';
+        document.getElementById('mystery-feedback').textContent = '🎉 Correct!';
+        document.getElementById('mystery-feedback').style.color = '#22c55e';
+      } else {
+        btn.style.background = '#f87171';
+        btn.style.color = 'white';
+        document.getElementById('mystery-feedback').textContent = '❌ Try the next one!';
+        document.getElementById('mystery-feedback').style.color = '#ef4444';
+      }
+      
+      document.getElementById('next-mystery-btn').style.display = 'block';
+    }
+    
+    function nextMystery() {
+      currentMysteryIndex = (currentMysteryIndex + 1) % mysteryClues.length;
+      const allButtons = document.querySelectorAll('#mystery-options button');
+      allButtons.forEach(b => {
+        b.disabled = false;
+        b.style.background = '';
+        b.style.color = '';
+      });
+      showMysteryQuestion();
+    }
+    
+    function initRelationshipQuiz() {
+      const quizContainer = document.getElementById('relationship-quiz');
+      quizContainer.innerHTML = '';
+      
+      relationships.forEach((rel, index) => {
+        const item = document.createElement('div');
+        item.className = 'rounded-3xl p-6 shadow-lg';
+        item.innerHTML = `
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <span class="text-5xl">${rel.person1}</span>
+            <p class="text-2xl font-bold flex-1 text-center">${rel.relationship}</p>
+            <select class="relationship-select px-6 py-3 text-xl rounded-xl border-4 font-bold" data-answer="${rel.answer}">
+              <option value="">Choose...</option>
+              <option value="dad">👨 Dad</option>
+              <option value="mom">👩 Mom</option>
+              <option value="grandpa">👴 Grandpa</option>
+              <option value="grandma">👵 Grandma</option>
+              <option value="brother">🧒 Brother</option>
+              <option value="sister">👧 Sister</option>
+              <option value="baby">👶 Baby</option>
+            </select>
+          </div>
+        `;
+        quizContainer.appendChild(item);
+      });
+    }
+    
+    function checkRelationships() {
+      const selects = document.querySelectorAll('.relationship-select');
+      let correct = 0;
+      
+      selects.forEach(select => {
+        if (select.value === select.dataset.answer) {
+          select.style.borderColor = '#22c55e';
+          select.style.background = '#d1fae5';
+          correct++;
+        } else {
+          select.style.borderColor = '#ef4444';
+          select.style.background = '#fee2e2';
+        }
+      });
+      
+      const scoreEl = document.getElementById('relationship-score');
+      if (correct === relationships.length) {
+        scoreEl.textContent = '🎉 Perfect! All relationships correct!';
+        scoreEl.style.color = '#22c55e';
+        setTimeout(() => {
+          document.getElementById('completion-screen').style.display = 'block';
+          showCelebration();
+        }, 1500);
+      } else {
+        scoreEl.textContent = `${correct}/${relationships.length} correct. Try again!`;
+        scoreEl.style.color = '#f59e0b';
+      }
+    }
+    
+    function showCelebration() {
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'celebration-confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.background = ['#ec4899', '#f59e0b', '#3b82f6', '#22c55e', '#a855f7'][Math.floor(Math.random() * 5)];
+          confetti.style.animationDelay = Math.random() * 0.5 + 's';
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 3000);
+        }, i * 100);
+      }
+    }
+    
+    function playAgain() {
+      buildScore = 0;
+      document.getElementById('completion-screen').style.display = 'none';
+      document.querySelectorAll('.build-slot').forEach(slot => {
+        slot.classList.remove('filled');
+        const role = slot.dataset.role;
+        const member = familyMembers.find(m => m.role === role);
+        slot.innerHTML = `
+          <span class="text-sm font-bold mb-2">${member.name}</span>
+          <span class="text-5xl opacity-30">${member.emoji}</span>
+        `;
+      });
+      initBuildingGame();
+      initMysteryGame();
+      initRelationshipQuiz();
+      document.getElementById('relationship-score').textContent = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      const baseFontStack = 'cursive';
+      
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      document.body.style.background = config.background_color || defaultConfig.background_color;
+      
+      document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
+      document.getElementById('main-title').style.fontSize = `${baseSize * 4.375}px`;
+      document.getElementById('main-title').style.color = config.text_color || defaultConfig.text_color;
+      
+      document.getElementById('welcome-message').textContent = config.welcome_message || defaultConfig.welcome_message;
+      document.getElementById('welcome-message').style.fontSize = `${baseSize * 1.875}px`;
+      document.getElementById('welcome-message').style.color = config.text_color || defaultConfig.text_color;
+      
+      document.getElementById('complete-message').textContent = config.complete_message || defaultConfig.complete_message;
+      document.getElementById('complete-message').style.color = config.text_color || defaultConfig.text_color;
+      
+      const startBtn = document.getElementById('start-game-btn');
+      startBtn.textContent = config.start_button_text || defaultConfig.start_button_text;
+      startBtn.style.background = config.primary_color || defaultConfig.primary_color;
+      startBtn.style.color = config.secondary_color || defaultConfig.secondary_color;
+      
+      const allButtons = document.querySelectorAll('button');
+      allButtons.forEach(btn => {
+        if (!btn.style.background || btn.style.background === '') {
+          btn.style.background = config.primary_color || defaultConfig.primary_color;
+          btn.style.color = config.secondary_color || defaultConfig.secondary_color;
+        }
+      });
+      
+      const buildSlots = document.querySelectorAll('.build-slot');
+      buildSlots.forEach(slot => {
+        slot.style.background = config.secondary_color || defaultConfig.secondary_color;
+        slot.style.borderColor = config.primary_color || defaultConfig.primary_color;
+      });
+      
+      const pieces = document.querySelectorAll('.building-game-piece');
+      pieces.forEach(piece => {
+        piece.style.background = config.secondary_color || defaultConfig.secondary_color;
+      });
+      
+      const titles = document.querySelectorAll('h2');
+      titles.forEach(title => {
+        title.style.color = config.text_color || defaultConfig.text_color;
+      });
+    }
+    
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['main_title', config.main_title || defaultConfig.main_title],
+          ['welcome_message', config.welcome_message || defaultConfig.welcome_message],
+          ['start_button_text', config.start_button_text || defaultConfig.start_button_text],
+          ['complete_message', config.complete_message || defaultConfig.complete_message]
+        ])
+      });
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('start-game-btn').onclick = startGame;
+      document.getElementById('reveal-clue-btn').onclick = revealClue;
+      document.getElementById('next-mystery-btn').onclick = nextMystery;
+      document.getElementById('check-relationships-btn').onclick = checkRelationships;
+      document.getElementById('play-again-btn').onclick = playAgain;
+      
+      if (window.elementSdk) {
+        onConfigChange(window.elementSdk.config);
+      } else {
+        onConfigChange(defaultConfig);
+      }
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bf5451d6273cfec',t:'MTc2ODY0Njc5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
